@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".MainActivity">
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rowCount="2"
+        android:columnCount="2"
+        tools:ignore="UselessParent">
+
+        <Button
+            android:id="@+id/go_download"
+            android:layout_margin="20dp"
+            android:textSize="24sp"
+            android:text="@string/go_download" />
+
+        <Button
+            android:id="@+id/go_download_list"
+            android:layout_margin="20dp"
+            android:textSize="24sp"
+            android:text="@string/go_download_list" />
+
+        <Button
+            android:id="@+id/go_download_directory"
+            android:layout_margin="20dp"
+            android:textSize="24sp"
+            android:text="@string/go_download_directory" />
+
+        <Button
+            android:id="@+id/go_document_directory"
+            android:layout_margin="20dp"
+            android:textSize="24sp"
+            android:text="@string/go_document_directory" />
+    </GridLayout>
+</LinearLayout>

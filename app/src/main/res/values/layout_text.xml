@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--主页面-->
+    <string name="go_download">去下载！</string>
+    <string name="go_download_list">下载列表</string>
+    <string name="go_download_directory">下载目录</string>
+    <string name="go_document_directory">文件目录</string>
+    <!--下载页面-->
+    <string name="start_download">开始下载</string>
+    <string name="pause_download">暂停下载</string>
+    <string name="cancel_download">取消下载</string>
+    <!--下载列表页面-->
+    <!--下载目录页面-->
+    <!--文件目录页面-->
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <!--App名称-->
+    <string name="app_name">DownloadDemo</string>
+</resources>
