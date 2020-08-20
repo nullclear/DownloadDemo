@@ -5,7 +5,6 @@ import android.app.*;
 import android.content.Intent;
 import android.os.*;
 import android.util.Log;
-import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.yxy.demo.MainActivity;
@@ -21,8 +20,54 @@ import java.util.concurrent.Executors;
 
 public class DownloadService extends Service {
     private final String TAG = "###DownloadService";
-    //Service中也能使用handler
-    public Handler handler = new Handler(Looper.getMainLooper()) {
+    private ExecutorService exec = Executors.newFixedThreadPool(5);
+    private Handler handler = new ServiceHandler(Looper.getMainLooper());
+    private DownloadBinder binder = new DownloadBinder();
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return true;//解绑服务不会销毁
+    }
+
+    @Override
+    public void onDestroy() {
+        exec.shutdown();
+        super.onDestroy();
+        Log.w(TAG, "下载服务销毁");
+    }
+
+    public class DownloadBinder extends Binder {
+        //开始下载
+        public void startDownload(String url, String cookie) {
+            Log.i(TAG, "download url = [" + url + "]");
+            DownloadTask task = new DownloadTask(url, cookie, DownloadService.this);
+            exec.execute(task);
+        }
+
+        //取消下载
+        public void cancelDownload(int downloadId) {
+            DownloadItem item = MyApplication.getDownloadItemMap().get(downloadId);
+            if (item == null) {
+                Log.e(TAG, "cancelDownload " + DownloadStatus.INVALID_DOWNLOAD_ID.getMessage() + " [" + downloadId + "]");
+                GenericUtils.showCenter(getApplicationContext(), DownloadStatus.INVALID_DOWNLOAD_ID.getMessage());
+            } else {
+                item.getDownloadTask().cancel();
+            }
+        }
+    }
+
+    //Service的Handler
+    private class ServiceHandler extends Handler {
+
+        public ServiceHandler(@NonNull Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (DownloadStatus.getType(msg.what)) {
@@ -33,58 +78,41 @@ public class DownloadService extends Service {
                     updateNotification((Integer) msg.obj, msg.what);
                     break;
                 case DOWNLOAD_SUCCESS:
-                    stopForeground(true);
-                    getNotificationManager().cancel((Integer) msg.obj);
-                    String text = "文件名称:" + msg.obj + "\n\n下载状态:" + DownloadStatus.getMessage(msg.what);
-                    GenericUtils.show(getApplicationContext(), text);
+                case DOWNLOAD_FAILED:
+                    String bottom = closeNotification((Integer) msg.obj, msg.what);
+                    GenericUtils.show(getApplicationContext(), bottom);
+                    break;
+                case DOWNLOAD_CANCEL_SUCCESS:
+                case DOWNLOAD_CANCEL_FAILED:
+                    String center = closeNotification((Integer) msg.obj, msg.what);
+                    GenericUtils.showCenter(getApplicationContext(), center);
+                    break;
+                case WRITE_ERROR:
+                case UNKNOWN_ERROR:
+                case INTERNET_CONNECTION_ERROR:
+                    String top = closeNotification((Integer) msg.obj, msg.what);
+                    GenericUtils.showTop(getApplicationContext(), top);
+                    break;
+                case URL_ERROR:
+                case FILE_EXIST:
+                case FILENAME_ERROR:
+                case DIRECTORY_WRITE_DENY:
+                case DIRECTORY_CREATE_FAILED:
+                    String preError = "名称: " + msg.obj.toString() + "\n\n状态: " + DownloadStatus.getMessage(msg.what);
+                    GenericUtils.showCenter(getApplicationContext(), preError);
                     break;
             }
         }
-    };
-
-    private ExecutorService exec = Executors.newFixedThreadPool(5);
-    private DownloadBinder binder = new DownloadBinder();
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind() returned: " + binder);
-        return binder;
     }
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return true;
-    }
-
-    @Override
-    public void onDestroy() {
-        exec.shutdown();
-        super.onDestroy();
-    }
-
-    public class DownloadBinder extends Binder {
-        public void startDownload(String url, String cookie) {
-            Log.d(TAG, "startDownload() called with: url = [" + url + "]");
-            DownloadTask task = new DownloadTask(url, cookie, DownloadService.this);
-            exec.execute(task);
-        }
-
-        public void cancelDownload(int downloadId) {
-            DownloadItem item = MyApplication.getDownloadItemMap().get(downloadId);
-            if (item == null) {
-                GenericUtils.showGravity(getApplicationContext(), "无效的下载ID", Gravity.TOP);
-            } else {
-                item.getDownloadTask().cancel();
-            }
-        }
+    public Handler getHandler() {
+        return handler;
     }
 
     public static final String CHANNEL_ID = "com.yxy.demo.service.DownloadService";
     public static final String CHANNEL_NAME = "Download service practice";
 
-    /**
-     * 获取通知管理器
-     */
+    //获取通知管理器
     @SuppressLint("ObsoleteSdkInt")
     private NotificationManager getNotificationManager() {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -99,7 +127,7 @@ public class DownloadService extends Service {
     }
 
     private Notification getNotification(DownloadItem item, int code) {
-        String title = item.getFileName() + "\n" + DownloadStatus.getMessage(code);
+        String title = "[" + item.getFileName() + "]\n" + DownloadStatus.getMessage(code);
         Intent intent = new Intent(this, MainActivity.class);//点击通知后要启动的Activity
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         //构建通知
@@ -122,7 +150,7 @@ public class DownloadService extends Service {
     private void initializeNotification(Integer downloadId, int code) {
         DownloadItem item = MyApplication.getDownloadItemMap().get(downloadId);
         if (item == null) {
-            Log.d(TAG, "initializeNotification: null");
+            Log.e(TAG, "initializeNotification " + DownloadStatus.INVALID_DOWNLOAD_ID.getMessage() + " [" + downloadId + "]");
         } else {
             getNotificationManager();
             startForeground(downloadId, getNotification(item, code));
@@ -133,9 +161,24 @@ public class DownloadService extends Service {
     private void updateNotification(Integer downloadId, int code) {
         DownloadItem item = MyApplication.getDownloadItemMap().get(downloadId);
         if (item == null) {
-            Log.d(TAG, "updateNotification: null");
+            Log.e(TAG, "updateNotification " + DownloadStatus.INVALID_DOWNLOAD_ID.getMessage() + " [" + downloadId + "]");
         } else {
             getNotificationManager().notify(downloadId, getNotification(item, code));
         }
+    }
+
+    //关闭通知
+    private String closeNotification(Integer downloadId, int code) {
+        String text;
+        stopForeground(true);
+        getNotificationManager().cancel(downloadId);
+        DownloadItem item = MyApplication.getDownloadItemMap().get(downloadId);
+        if (item == null) {
+            Log.e(TAG, "closeNotification " + DownloadStatus.INVALID_DOWNLOAD_ID.getMessage() + " [" + downloadId + "]");
+            text = DownloadStatus.INVALID_DOWNLOAD_ID.getMessage() + " [" + downloadId + "]";
+        } else {
+            text = "名称: " + item.getFileName() + "\n\n状态: " + DownloadStatus.getMessage(code);
+        }
+        return text;
     }
 }

@@ -35,13 +35,13 @@ public class DownloadActivity extends AppCompatActivity {
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected: 执行 ");
+            Log.i(TAG, "ServiceConnected: 执行");
             downloadBinder = (DownloadService.DownloadBinder) service;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "onServiceDisconnected: 执行");
+            Log.i(TAG, "ServiceDisconnected: 执行");
         }
     };
 
@@ -49,17 +49,19 @@ public class DownloadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download);
-        //初始化
-        init();
+        init();//初始化
     }
 
+    //初始化
     private void init() {
         ButterKnife.bind(this);
+        //绑定服务
         isBind = bindService(new Intent(this, DownloadService.class), connection, Service.BIND_AUTO_CREATE);
         if (isBind) {
-            GenericUtils.show(this, "绑定服务成功");
+            Log.i(TAG, "绑定下载服务成功");
         } else {
-            GenericUtils.show(this, "绑定服务失败");
+            GenericUtils.showTop(this, "绑定下载服务失败");
+            Log.e(TAG, "绑定下载服务失败");
         }
     }
 
@@ -67,9 +69,10 @@ public class DownloadActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.start_download:
-                startDownload("http://192.168.2.55:8080/data/datafilepage/%E6%B5%8B%E8%AF%95%E7%94%A8%E5%A4%A7%E6%96%87%E4%BB%B6.zip?dir=/&did=1000");
+                startDownload("http://192.168.37.100:8080/data/datafilepage/CampusTrade.zip?dir=/&did=1000");
                 break;
             case R.id.pause_download:
+                startDownload("http://192.168.37.100:8080/data/datafilepage/%E9%99%88%E5%A5%95%E8%BF%85%20-%20%E6%B5%AE%E5%A4%B8.flac?dir=/spring&did=1000");
                 break;
             case R.id.cancel_download:
                 downloadBinder.cancelDownload(1);
@@ -77,11 +80,13 @@ public class DownloadActivity extends AppCompatActivity {
         }
     }
 
+    //开始下载
     private void startDownload(String url) {
         if (downloadBinder != null && GenericUtils.isServiceRunning(this, DownloadService.class) && isBind) {
-            downloadBinder.startDownload(url, "SESSION=852a9bea-f2d6-4186-883d-6aad57551637");
+            downloadBinder.startDownload(url, "SESSION=014a6fb2-7bdc-414e-931e-6c3d2bb8e31f");
         } else {
-            GenericUtils.showGravity(this, "服务未开启");
+            GenericUtils.showTop(this, "下载服务未开启");
+            Log.e(TAG, "下载服务未开启");
         }
     }
 
@@ -92,6 +97,8 @@ public class DownloadActivity extends AppCompatActivity {
         if (isBind && GenericUtils.isServiceRunning(this, DownloadService.class)) {
             unbindService(connection);
             isBind = false;
+            downloadBinder = null;
+            Log.i(TAG, "解绑下载服务成功");
         }
     }
 }

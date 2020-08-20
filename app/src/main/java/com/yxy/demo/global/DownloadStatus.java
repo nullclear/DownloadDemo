@@ -17,6 +17,7 @@ public enum DownloadStatus {
     WRITE_ERROR(-8, "文件写入错误!"),
     DOWNLOAD_CANCEL_SUCCESS(-9, "下载取消成功"),
     DOWNLOAD_CANCEL_FAILED(-10, "下载取消失败"),
+    INVALID_DOWNLOAD_ID(-11, "无效的下载ID"),
     UNKNOWN_ERROR(-999, "未知错误!");
 
     private int code;

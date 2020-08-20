@@ -23,7 +23,8 @@ public class GenericUtils {
     private static final String TAG = "###GenericUtils";
 
     private static Toast toast;
-    private static Toast gravityToast;
+    private static Toast topToast;
+    private static Toast centerToast;
 
     public static void show(Context context, String text) {
         show(context, text, Toast.LENGTH_SHORT);
@@ -37,17 +38,30 @@ public class GenericUtils {
         toast.show();
     }
 
-    public static void showGravity(Context context, String text) {
-        showGravity(context, text, Gravity.CENTER);
+    public static void showTop(Context context, String text) {
+        showTop(context, text, Toast.LENGTH_SHORT);
     }
 
-    public static void showGravity(Context context, String text, int gravity) {
-        if (gravityToast != null) {
-            gravityToast.cancel();
+    public static void showTop(Context context, String text, int duration) {
+        if (topToast != null) {
+            topToast.cancel();
         }
-        gravityToast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-        gravityToast.setGravity(gravity, 0, 0);
-        gravityToast.show();
+        topToast = Toast.makeText(context, text, duration);
+        topToast.setGravity(Gravity.TOP, 0, 80);
+        topToast.show();
+    }
+
+    public static void showCenter(Context context, String text) {
+        showCenter(context, text, Toast.LENGTH_SHORT);
+    }
+
+    public static void showCenter(Context context, String text, int duration) {
+        if (centerToast != null) {
+            centerToast.cancel();
+        }
+        centerToast = Toast.makeText(context, text, duration);
+        centerToast.setGravity(Gravity.CENTER, 0, 0);
+        centerToast.show();
     }
 
     //判断服务是否在运行

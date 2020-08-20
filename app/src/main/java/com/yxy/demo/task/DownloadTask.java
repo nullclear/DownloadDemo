@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *Created by Nuclear on 2020/8/19
+ * Created by Nuclear on 2020/8/19
  */
 public class DownloadTask implements Runnable {
     private static final String TAG = "###DownloadTask";
@@ -45,7 +45,7 @@ public class DownloadTask implements Runnable {
     public DownloadTask(String url, String cookie, DownloadService service) {
         this.url = url;
         this.cookie = cookie;
-        this.handler = service.handler;
+        this.handler = service.getHandler();
         String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + service.getString(R.string.root_directory) + "/" + service.getString(R.string.download_directory);
         downloadDirectory = new File(path); // /storage/emulated/0/Union/download
     }
@@ -102,7 +102,7 @@ public class DownloadTask implements Runnable {
             conn.setDoInput(true);
             conn.connect();
 
-            Log.d(TAG, "Content-Disposition [ " + conn.getHeaderField("Content-Disposition") + " ]");
+            Log.d(TAG, "Content-Disposition = [ " + conn.getHeaderField("Content-Disposition") + " ]");
             //文件长度(单位是Byte)
             total.set(conn.getContentLengthLong());
             item.setTotalLength(total.get());
@@ -135,10 +135,10 @@ public class DownloadTask implements Runnable {
                     if (file.exists()) {
                         if (file.delete()) {
                             setFinalStatus(DownloadStatus.DOWNLOAD_CANCEL_SUCCESS);
-                            Log.d(TAG, "DOWNLOAD_CANCEL_SUCCESS");
+                            Log.i(TAG, "DOWNLOAD_CANCEL_SUCCESS");
                         } else {
                             setFinalStatus(DownloadStatus.DOWNLOAD_CANCEL_FAILED);
-                            Log.d(TAG, "DOWNLOAD_CANCEL_FAILED");
+                            Log.e(TAG, "DOWNLOAD_CANCEL_FAILED");
                         }
                     } else {
                         setFinalStatus(DownloadStatus.UNKNOWN_ERROR);
@@ -165,6 +165,7 @@ public class DownloadTask implements Runnable {
     //初始化下载信息
     private void initializeDownloadInformation() {
         downloadId = MyApplication.getDownloadId();
+        Log.i(TAG, "downloadId = = = >> [" + downloadId + "]");
         item = DownloadItem.Builder()
                 .id(downloadId)
                 .fileName(fileName)
@@ -174,7 +175,6 @@ public class DownloadTask implements Runnable {
                 .downloadStatus(DownloadStatus.START_DOWNLOAD)
                 .downloadTask(this)
                 .build();
-        Log.d(TAG, "downloadId = = >> " + downloadId);
         MyApplication.getDownloadItemMap().put(downloadId, item);
         MyApplication.getDownloadList().add(item);
         send(DownloadStatus.START_DOWNLOAD.getCode(), downloadId);
@@ -191,12 +191,12 @@ public class DownloadTask implements Runnable {
     //设置最终状态
     private void setFinalStatus(DownloadStatus downloadStatus) {
         isFinal.set(true);
-        send(downloadStatus.getCode(), downloadId);
         item.setDownloadStatus(downloadStatus);
         item.setEndTime(GenericUtils.D2S(new Date()));
         item.setSavedLength(sum.get());
         item.setTotalLength(total.get());
         item.setProgress(GenericUtils.N2P(sum.get(), total.get()));
+        send(downloadStatus.getCode(), downloadId);
     }
 
     //自动记录
@@ -217,7 +217,7 @@ public class DownloadTask implements Runnable {
     //取消下载
     public void cancel() {
         if (isFinal.get()) {
-            Log.d(TAG, "cancel: 下载任务已经结束");
+            Log.w(TAG, "downloadId = [" + downloadId + "] fileName = [" + fileName + "] 下载任务已经结束");
         } else {
             isCancel.set(true);
         }
