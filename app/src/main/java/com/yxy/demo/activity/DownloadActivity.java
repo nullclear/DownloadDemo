@@ -17,6 +17,7 @@ import com.yxy.demo.R;
 import com.yxy.demo.service.DownloadService;
 import com.yxy.demo.utils.GenericUtils;
 
+@SuppressWarnings("SameParameterValue")
 public class DownloadActivity extends AppCompatActivity {
     private final String TAG = "###DownloadActivity";
 
@@ -66,18 +67,19 @@ public class DownloadActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.start_download:
-                startDownload("https://dlc2.pconline.com.cn/filedown_51614_13926315/GHU9tuGB/tsbrowser_788_4.0.7.20@st.exe");
+                startDownload("http://192.168.2.55:8080/data/datafilepage/%E6%B5%8B%E8%AF%95%E7%94%A8%E5%A4%A7%E6%96%87%E4%BB%B6.zip?dir=/&did=1000");
                 break;
             case R.id.pause_download:
                 break;
             case R.id.cancel_download:
+                downloadBinder.cancelDownload(1);
                 break;
         }
     }
 
     private void startDownload(String url) {
         if (downloadBinder != null && GenericUtils.isServiceRunning(this, DownloadService.class) && isBind) {
-            downloadBinder.startDownload(url, "");
+            downloadBinder.startDownload(url, "SESSION=852a9bea-f2d6-4186-883d-6aad57551637");
         } else {
             GenericUtils.showGravity(this, "服务未开启");
         }

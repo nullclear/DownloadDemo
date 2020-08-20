@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!--配置文件路径-->
+    <string name="config_status">local</string>
+    <string name="root_directory">Union</string>
+    <string name="config_directory">config</string>
+    <string name="download_directory">download</string>
+    <string name="document_directory">document</string>
+    <string name="device_config">device.cfg</string>
+    <string name="user_config">user.cfg</string>
 </resources>

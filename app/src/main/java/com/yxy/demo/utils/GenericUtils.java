@@ -90,7 +90,7 @@ public class GenericUtils {
             try {
                 decodeUrl = URLDecoder.decode(url, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                Log.e(TAG, "getFileNameFromURL: 不支持的编码格式", e);
+                Log.e(TAG, "UnsupportedEncodingException: 不支持的编码格式", e);
             }
             if (decodeUrl == null) return "";
             int endIndex = decodeUrl.indexOf("?");
