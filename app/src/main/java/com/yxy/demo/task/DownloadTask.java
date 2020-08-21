@@ -102,7 +102,7 @@ public class DownloadTask implements Runnable {
             conn.setDoInput(true);
             conn.connect();
 
-            Log.d(TAG, "Content-Disposition = [ " + conn.getHeaderField("Content-Disposition") + " ]");
+            Log.i(TAG, "Content-Disposition = [ " + conn.getHeaderField("Content-Disposition") + " ]");
             //文件长度(单位是Byte)
             total.set(conn.getContentLengthLong());
             item.setTotalLength(total.get());

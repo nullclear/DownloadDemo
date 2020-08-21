@@ -3,7 +3,6 @@ package com.yxy.demo.application;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import com.yxy.demo.model.DownloadItem;
-import com.yxy.demo.task.DownloadTask;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,15 +22,9 @@ public class MyApplication extends Application {
     private static List<DownloadItem> downloadProgressList = new CopyOnWriteArrayList<>();
     //线程安全的下载条目Map
     private static Map<Integer, DownloadItem> downloadItemMap = new ConcurrentHashMap<>();
-    //通知ID
-    private static AtomicInteger notificationId = new AtomicInteger(1);
 
     public static Integer getDownloadId() {
         return downloadId.getAndIncrement();
-    }
-
-    public static Integer getNotificationId() {
-        return notificationId.getAndIncrement();
     }
 
     public static List<DownloadItem> getDownloadList() {

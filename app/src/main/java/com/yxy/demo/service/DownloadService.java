@@ -2,6 +2,7 @@ package com.yxy.demo.service;
 
 import android.annotation.SuppressLint;
 import android.app.*;
+import android.content.Context;
 import android.content.Intent;
 import android.os.*;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.yxy.demo.R;
 import com.yxy.demo.application.MyApplication;
 import com.yxy.demo.global.DownloadStatus;
 import com.yxy.demo.model.DownloadItem;
+import com.yxy.demo.notification.DownloadNotification;
 import com.yxy.demo.task.DownloadTask;
 import com.yxy.demo.utils.GenericUtils;
 
@@ -19,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DownloadService extends Service {
-    private final String TAG = "###DownloadService";
+    private static final String TAG = "###DownloadService";
     private ExecutorService exec = Executors.newFixedThreadPool(5);
     private Handler handler = new ServiceHandler(Looper.getMainLooper());
     private DownloadBinder binder = new DownloadBinder();
@@ -72,25 +74,30 @@ public class DownloadService extends Service {
         public void handleMessage(@NonNull Message msg) {
             switch (DownloadStatus.getType(msg.what)) {
                 case START_DOWNLOAD:
-                    initializeNotification((Integer) msg.obj, msg.what);
+                    //initializeNotification((Integer) msg.obj, msg.what);
+                    DownloadNotification.initializeNotification(DownloadService.this, (Integer) msg.obj, msg.what);
                     break;
                 case DOWNLOADING:
-                    updateNotification((Integer) msg.obj, msg.what);
+                    //updateNotification((Integer) msg.obj, msg.what);
+                    DownloadNotification.updateNotification(DownloadService.this, (Integer) msg.obj, msg.what);
                     break;
                 case DOWNLOAD_SUCCESS:
                 case DOWNLOAD_FAILED:
-                    String bottom = closeNotification((Integer) msg.obj, msg.what);
+                    //String bottom = closeNotification((Integer) msg.obj, msg.what);
+                    String bottom = DownloadNotification.finalNotification(DownloadService.this, (Integer) msg.obj, msg.what);
                     GenericUtils.show(getApplicationContext(), bottom);
                     break;
                 case DOWNLOAD_CANCEL_SUCCESS:
                 case DOWNLOAD_CANCEL_FAILED:
-                    String center = closeNotification((Integer) msg.obj, msg.what);
+                    //String center = closeNotification((Integer) msg.obj, msg.what);
+                    String center = DownloadNotification.finalNotification(DownloadService.this, (Integer) msg.obj, msg.what);
                     GenericUtils.showCenter(getApplicationContext(), center);
                     break;
                 case WRITE_ERROR:
                 case UNKNOWN_ERROR:
                 case INTERNET_CONNECTION_ERROR:
-                    String top = closeNotification((Integer) msg.obj, msg.what);
+                    //String top = closeNotification((Integer) msg.obj, msg.what);
+                    String top = DownloadNotification.finalNotification(DownloadService.this, (Integer) msg.obj, msg.what);
                     GenericUtils.showTop(getApplicationContext(), top);
                     break;
                 case URL_ERROR:
@@ -109,13 +116,14 @@ public class DownloadService extends Service {
         return handler;
     }
 
-    public static final String CHANNEL_ID = "com.yxy.demo.service.DownloadService";
-    public static final String CHANNEL_NAME = "Download service practice";
+    //在服务内部写通知
+    private static final String CHANNEL_ID = "com.yxy.demo.service.DownloadService";
+    private static final String CHANNEL_NAME = "Download Service";
 
     //获取通知管理器
     @SuppressLint("ObsoleteSdkInt")
     private NotificationManager getNotificationManager() {
-        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = manager.getNotificationChannel(CHANNEL_ID);
             if (notificationChannel == null) {

@@ -74,4 +74,11 @@ public class ExampleUnitTest {
         }
         System.out.println(55555);
     }
+
+    @Test
+    public void test9(){
+        Long a=0L;
+        int value = Long.valueOf((a / 1024)).intValue();
+        System.out.println(value);
+    }
 }

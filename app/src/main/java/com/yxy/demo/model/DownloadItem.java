@@ -14,7 +14,7 @@ public class DownloadItem {
     private String parentPath;
     private Long totalLength = 0L;
     private Long savedLength = 0L;
-    private String progress;
+    private String progress = "0.00%";
     private String startTime;
     private String endTime;
     private DownloadStatus downloadStatus;
@@ -78,7 +78,7 @@ public class DownloadItem {
     }
 
     public int getMax() {
-        return totalLength.intValue();
+        return Long.valueOf(totalLength / 1024).intValue();
     }
 
     public void setTotalLength(Long totalLength) {
@@ -94,7 +94,7 @@ public class DownloadItem {
     }
 
     public int getNow() {
-        return savedLength.intValue();
+        return Long.valueOf(savedLength / 1024).intValue();
     }
 
     public void setSavedLength(Long savedLength) {
@@ -177,9 +177,9 @@ public class DownloadItem {
         private String fileName;
         private String fileType;
         private String parentPath;
-        private Long totalLength;
-        private Long savedLength;
-        private String progress;
+        private Long totalLength = 0L;
+        private Long savedLength = 0L;
+        private String progress = "0.00%";
         private String startTime;
         private String endTime;
         private DownloadStatus downloadStatus;

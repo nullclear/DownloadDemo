@@ -69,10 +69,10 @@ public class DownloadActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.start_download:
-                startDownload("http://192.168.37.100:8080/data/datafilepage/CampusTrade.zip?dir=/&did=1000");
+                startDownload("http://192.168.2.55:8080/data/datafilepage/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B61%E5%8F%B7.zip?dir=/&did=1000");
                 break;
             case R.id.pause_download:
-                startDownload("http://192.168.37.100:8080/data/datafilepage/%E9%99%88%E5%A5%95%E8%BF%85%20-%20%E6%B5%AE%E5%A4%B8.flac?dir=/spring&did=1000");
+                startDownload("http://192.168.2.55:8080/data/datafilepage/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B62%E5%8F%B7.zip?dir=/&did=1000");
                 break;
             case R.id.cancel_download:
                 downloadBinder.cancelDownload(1);
@@ -83,7 +83,7 @@ public class DownloadActivity extends AppCompatActivity {
     //开始下载
     private void startDownload(String url) {
         if (downloadBinder != null && GenericUtils.isServiceRunning(this, DownloadService.class) && isBind) {
-            downloadBinder.startDownload(url, "SESSION=014a6fb2-7bdc-414e-931e-6c3d2bb8e31f");
+            downloadBinder.startDownload(url, "SESSION=d0125b56-5e16-4c63-a496-9ded16f4e8f1");
         } else {
             GenericUtils.showTop(this, "下载服务未开启");
             Log.e(TAG, "下载服务未开启");
